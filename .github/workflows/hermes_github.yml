@@ -21,11 +21,8 @@ jobs:
     name: Prepare Metadata for Curation
     runs-on: ubuntu-latest
 
-    if: >
-      github.event_name == 'push' && ! (
-        startsWith(github.ref_name, 'hermes/') ||
-        contains(github.event.head_commit.message, 'hermes/post')
-      )
+    # Only run on push events
+    if: github.event_name == 'push'
 
     permissions:
       contents: read
@@ -36,11 +33,12 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - run: pip install hermes
-      - run: pip install git+https://github.com/softwarepub/hermes-plugin-git
 
-      - run: hermes harvest
-      - run: hermes process
+      # For now, skip using hermes - we're just testing CI here
+      #- run: pip install hermes
+      #- run: pip install git+https://github.com/softwarepub/hermes-plugin-git
+      #- run: hermes harvest
+      #- run: hermes process
 
       # This is where we will run the Software CaRD plugin (later)
       # - run: hermes curate
@@ -48,28 +46,30 @@ jobs:
       # Create a stub report
       - run: |
           mkdir -p .hermes/curate
-          echo '{"test": "foobar"}' > .hermes/curate/report
+          echo '{"test": "foobar"}' > ./.hermes/curate/report
 
       # Upload artifact (there are no real file attachments for issues and the max length may impose problems later, so we can't just use a <details> tag)
       - id: upload-report
         uses: actions/upload-artifact@v6
         with:
           name: softwarecard-report
-          path: ./hermes/curation/*
+          path: ./.hermes/curate/*
           if-no-files-found: 'error'
           retention-days: 90
       - run: 'echo Report artifact accessible at ${{ steps.upload-report.outputs.artifact-url }}'
 
       - run: |
-          echo 'This is a stub message for Software CaRD report.' | tee -a report.md
-          echo 'Report artifact at ${{ steps.upload-report.outputs.artifact-url }}' | tee -a report.md
-          echo 'Rendered view at https://softwarepub.github.io/software-card/index.html?type=github&repoUrl=${{ github.repositoryUrl }}&artifactUrl=${{ steps.upload-report.outputs.artifact-url }}' | tee -a report.md
+          echo 'This is a stub message for a future Software CaRD report.' | tee -a ./report.md
+          echo 'View rendered version in the [Software CaRD SPA](https://softwarepub.github.io/software-card/index.html?type=github&repoUrl=${{ github.repositoryUrl }}&artifactUrl=${{ steps.upload-report.outputs.artifact-url }})' | tee -a ./report.md
+          echo '' | tee -a ./report.md
+          echo 'Created by hermes in [action run no. ${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})' | tee -a ./report.md
+          echo 'Find report artifact at [here](${{ steps.upload-report.outputs.artifact-url }})' | tee -a ./report.md
 
       # Now create an issue and add the Software CaRD report
       - name: Create Issue From File
         uses: peter-evans/create-issue-from-file@v6
         with:
-          title: An example issue
+          title: Release 0.0.0 Curation Report
           content-filepath: ./report.md
           #labels: |
           #  report
