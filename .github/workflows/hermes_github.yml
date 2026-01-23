@@ -11,10 +11,8 @@ on:
     branches:
       - main
 
-  # This trigger on closed pull requests is mandatory for the rest of the HERMES workflow.
-  pull_request:
-    types:
-      - closed
+  issue_comment:
+    types: [created]
 
 jobs:
   hermes-prepare:
@@ -76,4 +74,49 @@ jobs:
           #  automated issue
       - run: 'echo Created report in issue #${{ steps.create-report-issue.outputs.issue-number }}'
 
+  hermes-publish:
+    name: Publish after curation accepted
+    runs-on: ubuntu-latest
+
+    # The bit about who may run this job may be better put into steps, so we can extract from some configuration.
+    # The goal: only react to comments from curators!
+    if: >
+      github.event_name == 'issue_comment' &&
+      github.event.comment.author_association == 'MEMBER' &&
+      contains(github.event.comment.body, '/hermes publish')
+
+    steps:
+      - run: echo 'Curation was successful. Publishing now.'
+
+      # TODO: We need to figure out what should be checked out here!
+      #       Ideas: extract from comment? find issue and extract from artifact?
+      #       Caveats: make sure this is not an old issue and the artifact is still there...
+      #- uses: actions/checkout@v6
+      #- uses: actions/setup-python@v6
+      #  with:
+      #    python-version: '3.12'
+
+      # For now, skip using hermes - we're just testing CI here
+      #- run: pip install hermes
+      #- run: pip install git+https://github.com/softwarepub/hermes-plugin-git
+      # - run: hermes deposit
+      # - run: hermes post-process
+
+      # TODO: it would probably be a good idea to close the curation issue here. Maybe some other cleanup, too?
+
+  hermes-cleanup:
+    name: Cleanup after curation rejected
+    runs-on: ubuntu-latest
+
+    # The bit about who may run this job may be better put into steps, so we can extract from some configuration.
+    # The goal: only react to comments from curators!
+    if: >
+      github.event_name == 'issue_comment' &&
+      github.event.comment.author_association == 'MEMBER' &&
+      contains(github.event.comment.body, '/hermes reject')
+
+    steps:
+      - run: echo 'Curation was rejected. Cleaning up now.'
+
+      # TODO: do some cleanup here.
 
