@@ -34,7 +34,6 @@ jobs:
 
       # Install HERMES including interesting plugins
       - run: pip install hermes
-      - run: pip install git+https://github.com/softwarepub/hermes-plugin-git
       - run: pip install git+https://github.com/softwarepub/hermes-plugin-software-card
 
       # Run first HERMES steps
