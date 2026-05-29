@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+title: Software CaRD Showcase
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+license: "CC0-1.0"
+version: 0.1.0
+authors:
+  - given-names: Fizzy
+    family-names: Pop
+  - given-names: Ahsoka
+    family-names: Tano
+    email: tano@jeditemple.force
+    affiliation: Jedi Temple Coruscant
+    orcid: 'https://orcid.org/0000-0001-9338-6966'
