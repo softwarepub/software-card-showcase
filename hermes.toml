@@ -1,6 +1,9 @@
 [harvest]
 sources = [ "cff", "git",]
 
+[curate]
+method = "software_card"
+
 [deposit]
 target = "invenio_rdm"
 
